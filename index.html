@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>RPG Event Flow Editor</title>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <button id="addNode">Add Node</button>
+            <button onclick="saveData()">Save</button>
+            <button onclick="loadData()">Load</button>
+            <button onclick="testGame()">Test</button>
+        </div>
+        <div class="toolbar-right">
+            <div class="zoom-controls">
+                <button id="zoomOut">-</button>
+                <span class="zoom-level">100%</span>
+                <button id="zoomIn">+</button>
+            </div>
+        </div>
+    </div>
+    <div class="canvas" id="canvas">
+        <svg id="connections"></svg>
+    </div>
+    <div class="selection-box" id="selection-box"></div>
+
+    <script type="module" src="dist/index.js"></script>
+</body>
