@@ -1,7 +1,6 @@
 import * as Types from '../types.js';
 import * as Utils from '../utils.js';
 import * as Conn from '../modules/connections.js';
-import * as Select from '../modules/selection.js';
 import * as Actions from '../modules/actions.js';
 
 import { state } from '../state.js';

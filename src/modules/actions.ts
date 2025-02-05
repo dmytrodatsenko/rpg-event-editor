@@ -22,7 +22,7 @@ export function undoAction(): void {
     function isConnection(item: Types.Node | Types.Connection | Types.Choice): item is Types.Connection { return item.inname === 'connection';}
     function isChoice(item: Types.Node | Types.Connection | Types.Choice): item is Types.Choice { return item.inname === 'choice';}
 
-    Items.forEach(item => {
+    Items.forEach((item: Types.Node | Types.Connection | Types.Choice) => {
         if (isNode(item)) {
             const nodeId = Number(item.id);
             if (nodeId in state.nodes) {

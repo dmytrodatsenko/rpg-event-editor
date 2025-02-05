@@ -1,11 +1,11 @@
-import * as Utils from './src/utils.js';
-import * as Zoom from './src/modules/zoom.js';
-import * as Nodes from './src/modules/nodes.js';
-import * as Select from './src/modules/selection.js';
-import * as Actions from './src/modules/actions.js';
-import * as Conn from './src/modules/connections.js';
+import * as Utils from './utils.js';
+import * as Zoom from './modules/zoom.js';
+import * as Nodes from './modules/nodes.js';
+import * as Select from './modules/selection.js';
+import * as Actions from './modules/actions.js';
+import * as Conn from './modules/connections.js';
 
-import {state} from './src/state.js';
+import {state} from './state.js';
 
 // Set up canvas dimensions and scrolling
 
@@ -94,7 +94,6 @@ document.addEventListener('keydown', (e) => {
 window.addEventListener('scroll', () => {
     Conn.renderAllConnections();
 });
-
 
 //Selection listeners
 document.addEventListener('mousedown', (e: MouseEvent) => {

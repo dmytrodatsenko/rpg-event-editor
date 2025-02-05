@@ -1,7 +1,4 @@
 import * as Types from '../src/types.js';
- 
- // Main nodes storage
-
 
  class State {
     public canvasWidth = 3840;
@@ -43,9 +40,9 @@ import * as Types from '../src/types.js';
 
     //Resizing 
     public isResizing: boolean = false;
-    public activeResizeNode: Types.Node | null; 
     public resizeStartX: number = 0;
     public resizeStartY: number = 0;
+    public activeResizeNode: Types.Node | null = null;
 
  }
 
