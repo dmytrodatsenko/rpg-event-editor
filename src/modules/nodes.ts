@@ -52,7 +52,7 @@ export function renderNode(nodeId: number): void {
     nodeElement.style.transform = `scale(${state.currentZoom})`;
     nodeElement.style.height = `${node.height}px`;
     nodeElement.style.width = `${node.width}px`;
-
+    
     // // Node container
     const container = document.createElement('div');
     container.className = 'node-container';
@@ -364,9 +364,6 @@ export function removeNode(nodeId: number): void {
     }
 }
 
-
-
-
 export function calculateMinNodeDimensions(nodeElement: HTMLElement): { minWidth: number, minHeight: number } {
     // Get base minimum dimensions from CSS
     const baseMinWidth = Utils.getComputedCSSValue('--min-node-width');
@@ -376,7 +373,6 @@ export function calculateMinNodeDimensions(nodeElement: HTMLElement): { minWidth
     const choicesRect = choicesDiv.getBoundingClientRect();
     const minWidth = baseMinWidth;
     const minHeight = baseMinHeight + choicesRect.height; 
-    console.log(minWidth, minHeight, choicesRect.height)
     return {
         minWidth: minWidth,
         minHeight: minHeight
