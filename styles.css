@@ -1,7 +1,7 @@
 /* Variables */
 :root {  
-  --bg-color: #1e1e1e;
-  --bg-color-secondary: #262626;
+  --dark-grey-color: #262626;
+  --darkest-grey-color: #1e1e1e;
   --text-color: #dcddde;
   --interactive: #4a4a4a;
   --interactive-hover: #666666;
@@ -11,14 +11,17 @@
   --red-color: #B53336;
   --green-color: #397F40;
   --blue-color: #206BB8;
+  
   --black-shadow-color: rgba(0, 0, 0, 0.15);
   --black-hover-color: rgba(255, 255, 255, 0.05);
   
-    
-  --min-node-height: 200px;
-  --min-node-width: 300px;
+  --min-node-height: 150px;
+  --min-node-width: 200px;
+  --init-node-height: 175px;
+  --init-node-width: 225px;
+
   --min-choice-height: 50px;
-  --min-choice-width: 300px;
+  --min-choice-width: 150px;
 
   --add-choice-height: 25px;
   --node-inside-padding: 10px;
@@ -48,7 +51,7 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: var(--text-color);
-  background-color: var(--bg-color);
+  background-color: var(--dark-grey-color);
   background-image: 
       linear-gradient(to right, var(--border) 1px, transparent 1px),
       linear-gradient(to bottom, var(--border) 1px, transparent 1px);
@@ -66,7 +69,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--bg-color-secondary);
+  background: var(--dark-grey-color);
   border-bottom: 1px solid var(--border);
   border-radius: var(--radius-sm);
   z-index: 2500;
@@ -87,19 +90,6 @@ body {
   background: var(--interactive-hover);
 }
 
-.zoom-controls {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px;
-  background: var(--bg-color);
-  border-radius: var(--radius-sm);
-}
-
-.zoom-level {
-  padding: 0 8px;
-  font-size: 13px;
-}
 
 .canvas {
   margin-top: 42px;
@@ -110,7 +100,7 @@ body {
 /* Node Base Styles */
 .node {
   position: absolute;
-  background-color: var(--bg-color);
+  background-color: var(--darkest-grey-color);
   border: 2px solid var(--grey-color);
   border-radius: var(--radius-sm);
   cursor: move;
@@ -187,7 +177,9 @@ body {
   white-space: pre-wrap;
   height: 100%;
   width: 100%;
+  min-width: 100px;
   display: flex;
+  flex: 1;
   flex-direction: column;
   margin-bottom: var(--node-inside-padding);
 }
@@ -196,8 +188,10 @@ body {
   border: none;
   font-family: inherit;
   border-radius: var(--radius-sm);
-  background-color: var(--bg-color-secondary) !important;
+  color: var(--text-color);
+  background-color: var(--dark-grey-color) !important;
   padding: var(--node-input-padding);
+  font-size: calc(var(--base-font-size) * 1);
 }
 .node-input:focus {
   outline: none;
@@ -215,10 +209,7 @@ body {
   resize: none;
   overflow-y: auto;
 }
-.node-input {
-  font-size: calc(var(--base-font-size) * 1);
-  color: var(--dark-gray);
-}
+
 .node-content.node-input::-webkit-scrollbar {
   width: 6px;
 }
@@ -456,7 +447,6 @@ body {
     border: none;
     border-radius: 3px;
     cursor: pointer;
-    /* font-weight: bold; */
   }
   
   .connection-type-select option {
@@ -479,7 +469,7 @@ body {
     top: 0;
     bottom: 0;
     width: 300px;
-    background-color: var(--bg-color);
+    background-color: var(--dark-grey-color);
     box-shadow: -2px 0 4px rgba(0, 0, 0, 0.1);
     padding: 1rem;
     transform: translateX(100%);
@@ -519,7 +509,7 @@ body {
   }
   
   .editor-panel .node-input {
-    background-color: var(--bg-color-color);
+    background-color: var(--dark-grey-color);
     padding: 8px;
     margin-bottom: 1px;
   }
@@ -579,3 +569,32 @@ body {
     pointer-events: none;
     z-index: 1500;
   }
+
+
+  
+.toolbar-right {
+  display: flex;
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px;
+  background: var(--dark-grey-color);
+  border-radius: var(--radius-sm);
+}
+
+.zoom-level {
+  padding: 0 8px;
+  font-size: 13px;
+}
+
+.theme-changer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px;
+  background: var(--bg-color);
+  border-radius: var(--radius-sm);
+}

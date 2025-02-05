@@ -79,3 +79,7 @@ export function undoAction(): void {
     });
     state.objectsHistory.pop();
 }
+
+export function changeTheme(): void {
+
+}

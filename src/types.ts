@@ -13,7 +13,6 @@ export interface Node {
     choices?: Record<string, Choice>;
 }
 
-
 export interface Choice {
     id: string;
     text: string;
@@ -47,10 +46,36 @@ export interface ObjectsHistory {
     connections: Connection[][];
 }
 
-
 export interface DragPosition {
     x: number;
     y: number;
     offsetX: number;
     offsetY: number;
 }
+
+export interface Theme {
+    background: {
+      primary: string;
+      secondary: string;
+    };
+    text: {
+      primary: string;
+      secondary: string;
+    };
+    node: {
+        primary: string;
+        secondary: string;
+    }
+    border: {
+      default: string;
+      hover: string;
+    };
+    button: {
+        default: string;
+        hover: string;
+    };
+    status: {
+      success: string;
+      error: string;
+    };
+  }

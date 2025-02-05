@@ -11,6 +11,7 @@ export function startDrag(e: MouseEvent, nodeId: number): void {
     e.preventDefault();
 
     state.isDragging = true;
+    state.isResizing = false;
     const node = state.nodes[nodeId];
     // Handle selection during drag start
     if (!state.selectedNodes.has(node)) {

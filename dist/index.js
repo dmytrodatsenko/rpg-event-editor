@@ -95,8 +95,8 @@ function addNode(type = "choice", x = calcRandomPosition("x"), y = calcRandomPos
     text: "",
     x,
     y,
-    width: getComputedCSSValue("--min-node-width"),
-    height: getComputedCSSValue("--min-node-height"),
+    width: getComputedCSSValue("--init-node-width"),
+    height: getComputedCSSValue("--init-node-height"),
     inname: "node"
   };
   if (type === "choice") {
@@ -283,18 +283,6 @@ function renderChoice(nodeId, choiceId) {
     return;
   }
   choicesDiv.appendChild(choiceItem);
-  const nodeElement = document.querySelector(`#node-${nodeId}`);
-  if (nodeElement) {
-    const styles = window.getComputedStyle(nodeElement);
-    const startWidth = parseInt(styles.width, 10);
-    const startHeight = parseInt(styles.height, 10);
-    const { minWidth, minHeight } = calculateMinNodeDimensions(nodeElement);
-    const newWidth = minWidth;
-    const newHeight = minHeight;
-    nodeElement.style.width = `${newWidth}px`;
-    nodeElement.style.height = `${newHeight}px`;
-    renderAllConnections();
-  }
   textInput.addEventListener("input", (e) => {
     e.stopPropagation();
     choice.text = textInput.value;
@@ -345,12 +333,15 @@ function removeChoice(nodeId, choiceId) {
   renderAllConnections();
 }
 function updateNodePadSize(nodeId, choiceId, orient) {
-  let node = state.nodes[nodeId];
+  const node = state.nodes[nodeId];
   if (!node.choices) {
     return;
   }
-  let choice = node.choices[choiceId];
   const nodeElement = document.getElementById(`node-${nodeId}`);
+  if (!nodeElement) {
+    return;
+  }
+  let choice = node.choices[choiceId];
   const nodeDefaultPadding = 2 * getComputedCSSValue("--node-input-padding");
   if (nodeElement) {
     const currentHeight = parseInt(nodeElement.style.height);
@@ -360,7 +351,6 @@ function updateNodePadSize(nodeId, choiceId, orient) {
       node.height = currentHeight - choice.height - nodeDefaultPadding;
     }
     nodeElement.style.height = `${node.height}px`;
-    console.log(nodeElement.style.height);
   }
 }
 function removeNode(nodeId) {
@@ -377,35 +367,14 @@ function removeNode(nodeId) {
 function calculateMinNodeDimensions(nodeElement) {
   const baseMinWidth = getComputedCSSValue("--min-node-width");
   const baseMinHeight = getComputedCSSValue("--min-node-height");
-  const titleContainer = nodeElement.querySelector(".node-title-container");
-  const contentInput = nodeElement.querySelector(".node-content");
-  const titleHeight = titleContainer ? titleContainer.offsetHeight : 0;
-  const contentHeight = contentInput ? contentInput.offsetHeight : 0;
-  const choicesContainer = nodeElement.querySelector(".choice-container");
-  if (!choicesContainer) {
-    return {
-      minWidth: baseMinWidth,
-      minHeight: Math.max(baseMinHeight, titleHeight + contentHeight)
-    };
-  }
-  const choicesDiv = choicesContainer.querySelector(".choices-div");
-  let choicesHeight = 0;
-  let maxChoiceWidth = baseMinWidth;
-  if (choicesDiv) {
-    const choices = choicesDiv.querySelectorAll(".choice-item");
-    choices.forEach((choice) => {
-      const choiceElement = choice;
-      choicesHeight += choiceElement.offsetHeight;
-      const choiceWidth = choiceElement.offsetWidth;
-      maxChoiceWidth = Math.max(maxChoiceWidth, choiceWidth);
-    });
-    if (choices.length > 1) {
-      choicesHeight += choices.length - 1;
-    }
-  }
+  const choicesDiv = nodeElement.querySelector(".choices-div");
+  const choicesRect = choicesDiv.getBoundingClientRect();
+  const minWidth = baseMinWidth;
+  const minHeight = baseMinHeight + choicesRect.height;
+  console.log(minWidth, minHeight, choicesRect.height);
   return {
-    minWidth: baseMinWidth,
-    minHeight: Math.max(baseMinHeight, titleHeight + contentHeight)
+    minWidth,
+    minHeight
   };
 }
 
@@ -803,6 +772,7 @@ function startDrag(e, nodeId) {
   }
   e.preventDefault();
   state.isDragging = true;
+  state.isResizing = false;
   const node = state.nodes[nodeId];
   if (!state.selectedNodes.has(node)) {
     if (!e.ctrlKey && !e.metaKey) {
@@ -948,7 +918,10 @@ document.addEventListener("mousedown", (e) => {
         selectNode(nodeId);
       }
     } else {
-      selectNode(nodeId);
+      if (!state.selectedNodes.has(node)) {
+        clearNodeSelection();
+        selectNode(nodeId);
+      }
     }
     startDrag(e, nodeId);
   }
@@ -1047,11 +1020,14 @@ document.addEventListener("mousedown", (e) => {
     state.isDragging = false;
     state.resizeStartX = e.pageX;
     state.resizeStartY = e.pageY;
+    clearNodeSelection();
+    selectNode(nodeId);
   }
 }, true);
 document.addEventListener("mousemove", (e) => {
   if (!state.isResizing || !state.activeResizeNode)
     return;
+  state.selectedNodes.clear();
   const nodeElement = document.querySelector(`#node-${state.activeResizeNode.id}`);
   if (nodeElement) {
     const { minWidth, minHeight } = calculateMinNodeDimensions(nodeElement);

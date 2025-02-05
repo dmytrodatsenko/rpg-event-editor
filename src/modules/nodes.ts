@@ -14,8 +14,8 @@ export function addNode(type: Types.NodeType = 'choice', x: number = Utils.calcR
         text: '',
         x: x,
         y: y,
-        width: Utils.getComputedCSSValue('--min-node-width'),
-        height: Utils.getComputedCSSValue('--min-node-height'),
+        width: Utils.getComputedCSSValue('--init-node-width'),
+        height: Utils.getComputedCSSValue('--init-node-height'),
         inname: 'node'
     };
     if (type === 'choice'){
@@ -188,7 +188,6 @@ function addChoice(nodeId: number): void {
     renderChoice(nodeId, choiceId);
     updateNodePadSize(nodeId, choiceId, '+');
 
-    //Conn.renderAllConnections();
     //state.addToActionHistory([choice]);
 }
 
@@ -257,23 +256,6 @@ export function renderChoice(nodeId: number, choiceId: string): void {
     if (!choicesDiv) {return;}
     choicesDiv.appendChild(choiceItem);
 
-    // Resize node element (based on rendered choices)
-    const nodeElement = document.querySelector<HTMLInputElement>(`#node-${nodeId}`);
-    if (nodeElement) {
-        const styles = window.getComputedStyle(nodeElement);
-        const startWidth = parseInt(styles.width, 10);
-        const startHeight = parseInt(styles.height, 10);  
-
-        const { minWidth, minHeight } = calculateMinNodeDimensions(nodeElement);
-        const newWidth = minWidth;
-        const newHeight = minHeight;            
-        nodeElement.style.width = `${newWidth}px`;
-        nodeElement.style.height = `${newHeight}px`;
-
-        //Update connections after resize
-        Conn.renderAllConnections();
-    }
-
     // Event listeners
     textInput.addEventListener('input', (e) => {
         e.stopPropagation();
@@ -319,7 +301,7 @@ function removeChoice(nodeId: number, choiceId: string): void {
         Actions.addToActionHistory([node.choices[choiceId]]);
     }
 
-    // Update ndoe size based on choice size
+    // Update node size based on choice size
     updateNodePadSize(nodeId, choiceId, '-');
 
     // Remove choice from node
@@ -329,7 +311,6 @@ function removeChoice(nodeId: number, choiceId: string): void {
     // Remove choice element and re-render other choices
     let choicesDiv = document.querySelector(`#div-node-${nodeId}`) as HTMLDivElement;
     if (!choicesDiv) {return;}
-
     choicesDiv.innerHTML = '';
     Object.entries(node.choices).forEach(([id, _]) => {
         renderChoice(nodeId, id);
@@ -346,12 +327,17 @@ function removeChoice(nodeId: number, choiceId: string): void {
 
 
 export function updateNodePadSize(nodeId: number, choiceId: string, orient: '+' | '-'): void {
-    let node = state.nodes[nodeId];
+    const node = state.nodes[nodeId];
     if (!node.choices) {
         return;
     }
-    let choice = node.choices[choiceId];
+
     const nodeElement = document.getElementById(`node-${nodeId}`);
+    if (!nodeElement) {
+        return;
+    }
+
+    let choice = node.choices[choiceId];
     const nodeDefaultPadding = 2 * Utils.getComputedCSSValue('--node-input-padding');
     if (nodeElement) {
         const currentHeight = parseInt(nodeElement.style.height);
@@ -362,7 +348,6 @@ export function updateNodePadSize(nodeId: number, choiceId: string, orient: '+' 
             node.height = currentHeight - choice.height - nodeDefaultPadding;
         }
         nodeElement.style.height = `${node.height}px`;
-        console.log(nodeElement.style.height);
     }
 }
 
@@ -381,54 +366,74 @@ export function removeNode(nodeId: number): void {
 }
 
 
+
+
 export function calculateMinNodeDimensions(nodeElement: HTMLElement): { minWidth: number, minHeight: number } {
     // Get base minimum dimensions from CSS
     const baseMinWidth = Utils.getComputedCSSValue('--min-node-width');
     const baseMinHeight = Utils.getComputedCSSValue('--min-node-height');
+    const choicesDiv = nodeElement.querySelector('.choices-div') as HTMLDivElement;
     
-    const titleContainer = nodeElement.querySelector('.node-title-container') as HTMLElement;
-    const contentInput = nodeElement.querySelector('.node-content') as HTMLElement;
-    
-    // Get title and content heights
-    const titleHeight = titleContainer ? titleContainer.offsetHeight : 0;
-    const contentHeight = contentInput ? contentInput.offsetHeight : 0;
-
-    // Find choices container
-    const choicesContainer = nodeElement.querySelector('.choice-container');
-    if (!choicesContainer) {
-        return {  
-            minWidth: baseMinWidth,
-            minHeight: Math.max(baseMinHeight, titleHeight + contentHeight) 
-        };
-    }
-
-    
-    // Calculate choices dimensions
-    const choicesDiv = choicesContainer.querySelector('.choices-div');
-    let choicesHeight = 0;
-    let maxChoiceWidth = baseMinWidth;
-
-    if (choicesDiv) {
-        // Get all choice items
-        const choices = choicesDiv.querySelectorAll('.choice-item');
-        choices.forEach(choice => {
-            const choiceElement = choice as HTMLElement;
-            choicesHeight += choiceElement.offsetHeight;
-            const choiceWidth = choiceElement.offsetWidth;
-            maxChoiceWidth = Math.max(maxChoiceWidth, choiceWidth);    
-        });
-
-        // Add spacing between choices if there are multiple choices
-        if (choices.length > 1) {
-            choicesHeight += (choices.length - 1); //* contentSpacing;
-        }
-    }
-
-    //Work here add choices 
-    return {  
-        minWidth: baseMinWidth,
-        minHeight: Math.max(baseMinHeight, titleHeight + contentHeight) 
+    const choicesRect = choicesDiv.getBoundingClientRect();
+    const minWidth = baseMinWidth;
+    const minHeight = baseMinHeight + choicesRect.height; 
+    console.log(minWidth, minHeight, choicesRect.height)
+    return {
+        minWidth: minWidth,
+        minHeight: minHeight
     };
 }
+
+
+
+// export function calculateMinNodeDimensions(nodeElement: HTMLElement): { minWidth: number, minHeight: number } {
+//     // Get base minimum dimensions from CSS
+//     const baseMinWidth = Utils.getComputedCSSValue('--min-node-width');
+//     const baseMinHeight = Utils.getComputedCSSValue('--min-node-height');
+    
+//     const titleContainer = nodeElement.querySelector('.node-title-container') as HTMLElement;
+//     const contentInput = nodeElement.querySelector('.node-content') as HTMLElement;
+    
+//     // Get title and content heights
+//     const titleHeight = titleContainer ? titleContainer.offsetHeight : 0;
+//     const contentHeight = contentInput ? contentInput.offsetHeight : 0;
+
+//     // Find choices container
+//     const choicesContainer = nodeElement.querySelector('.choice-container');
+//     if (!choicesContainer) {
+//         return {  
+//             minWidth: baseMinWidth,
+//             minHeight: Math.max(baseMinHeight, titleHeight + contentHeight) 
+//         };
+//     }
+
+    
+//     // Calculate choices dimensions
+//     const choicesDiv = choicesContainer.querySelector('.choices-div');
+//     let choicesHeight = 0;
+//     let maxChoiceWidth = baseMinWidth;
+
+//     if (choicesDiv) {
+//         // Get all choice items
+//         const choices = choicesDiv.querySelectorAll('.choice-item');
+//         choices.forEach(choice => {
+//             const choiceElement = choice as HTMLElement;
+//             choicesHeight += choiceElement.offsetHeight;
+//             const choiceWidth = choiceElement.offsetWidth;
+//             maxChoiceWidth = Math.max(maxChoiceWidth, choiceWidth);    
+//         });
+
+//         // Add spacing between choices if there are multiple choices
+//         if (choices.length > 1) {
+//             choicesHeight += (choices.length - 1); //* contentSpacing;
+//         }
+//     }
+
+//     //Work here add choices 
+//     return {  
+//         minWidth: baseMinWidth,
+//         minHeight: Math.max(baseMinHeight, titleHeight + contentHeight) 
+//     };
+// }
 
 

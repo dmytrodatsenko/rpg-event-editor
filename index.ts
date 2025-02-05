@@ -109,14 +109,17 @@ document.addEventListener('mousedown', (e: MouseEvent) => {
         const node = state.nodes[nodeId];
 
         if (e.ctrlKey) {
-            // Toggle selection with Ctrl key
             if (state.selectedNodes.has(node)) {
                 Select.deselectNode(nodeId);
             } else {
                 Select.selectNode(nodeId);
             }
         } else {
-            Select.selectNode(nodeId);
+            // Only clear existing selection if clicking on an unselected node
+            if (!state.selectedNodes.has(node)) {
+                Select.clearNodeSelection();
+                Select.selectNode(nodeId);
+            }
         }       
         Select.startDrag(e, nodeId); 
     }
@@ -250,16 +253,20 @@ document.addEventListener('mousedown', (e: MouseEvent) => {
 
         state.resizeStartX = e.pageX;  
         state.resizeStartY = e.pageY; 
+
+        // Clear other selected nodes, select only active node
+        Select.clearNodeSelection();
+        Select.selectNode(nodeId);
     }
 }, true); 
 
 document.addEventListener('mousemove', (e: MouseEvent) => {
     if (!state.isResizing || !state.activeResizeNode) return;
     
+    state.selectedNodes.clear();
     const nodeElement = document.querySelector<HTMLInputElement>(`#node-${state.activeResizeNode.id}`);
     if (nodeElement) {
         const { minWidth, minHeight } = Nodes.calculateMinNodeDimensions(nodeElement);
-        
         const deltaX = e.pageX - state.resizeStartX;
         const deltaY = e.pageY - state.resizeStartY;
 

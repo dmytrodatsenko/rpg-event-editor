@@ -8,7 +8,7 @@
         "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
         "version": "node version-bump.mjs"
     },
-    "keywords": ["obsidian", "plugin", "rpg"],
+    "keywords": ["event", "plugin", "rpg"],
     "author": "",
     "license": "MIT",
     "devDependencies": {
