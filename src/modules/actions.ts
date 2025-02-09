@@ -2,6 +2,7 @@ import { state } from '../state.js';
 import * as Types from '../types.js';
 import * as Conn from '../modules/connections.js';
 import * as Nodes from '../modules/nodes.js';
+import * as Panel from '../modules/panel.js';
 
 export function addToActionHistory(objects: Array<Types.Node | Types.Connection | Types.Choice>): void {
     state.objectsHistory.push(objects);
@@ -37,6 +38,9 @@ export function undoAction(): void {
                         Nodes.renderChoice(nodeId, choiceId);
                     });
                 }
+                if (state.editorPanel && state.editorPanel.classList.contains('open')) {
+                    Panel.showEditorPanel(nodeId);
+                }
             }
 
         }
@@ -66,11 +70,19 @@ export function undoAction(): void {
                         choices[choiceId] = item;
                         const choicesDiv = document.querySelector(`#div-node-${nodeId}`);
                         if (choicesDiv) {
+                            if (Object.values(choices).length >= state.maxChoicesPerNode) {
+                                console.log(`Max choices in Node: ${nodeId}`)
+                                return;
+                            }
                             choicesDiv.innerHTML = '';
                             Object.keys(choices).forEach(choiceId => {
                                 Nodes.renderChoice(Number(nodeId), choiceId);
                             });
-                            Nodes.updateNodePadSize(Number(nodeId), choiceId, '+');
+                            Nodes.updateNodePadSize(Number(nodeId), choiceId, '+');         
+                            if (state.editorPanel && state.editorPanel.classList.contains('open')) {
+                                Panel.showEditorPanel(Number(nodeId));
+                            }
+
                         }
                     }
                 }
@@ -78,6 +90,7 @@ export function undoAction(): void {
         }
     });
     state.objectsHistory.pop();
+
 }
 
 export function changeTheme(): void {

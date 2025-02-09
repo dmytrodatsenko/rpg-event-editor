@@ -2,6 +2,7 @@ import * as Types from '../types.js';
 import * as Utils from '../utils.js';
 import * as Conn from '../modules/connections.js';
 import * as Actions from '../modules/actions.js';
+import * as Panel from '../modules/panel.js';
 
 import { state } from '../state.js';
 
@@ -66,7 +67,7 @@ export function renderNode(nodeId: number): void {
     const titleInput = document.createElement('input');
     titleInput.type = 'text';
     titleInput.className = 'node-title node-input';
-    titleInput.value = node.title || 'Event title';
+    titleInput.value = node.title || '';
     titleInput.style.fontSize = `${scaledFontSize}px`;
     titleContainer.appendChild(titleInput);
     container.appendChild(titleContainer);
@@ -97,18 +98,43 @@ export function renderNode(nodeId: number): void {
     titleInput.addEventListener('input', (e) => {
         e.stopPropagation();
         node.title = titleInput.value;
+        if (state.currentPanelNodeId != nodeId) {
+            Panel.hideEditorPanel();
+        }
+        else {
+            if (state.editorPanel && state.editorPanel.classList.contains('open')) {
+                Panel.showEditorPanel(nodeId);
+            }
+        }
     });
     titleInput.addEventListener('mousedown', (e) => {
         e.stopPropagation();
     });
+    titleInput.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.ctrlKey && e.code === 'KeyZ') {
+            e.stopPropagation();
+        }
+    });
     contentInput.addEventListener('input', (e) => {
         e.stopPropagation();
         node.text = contentInput.value;
+        if (state.currentPanelNodeId != nodeId) {
+            Panel.hideEditorPanel();
+        }
+        else {
+            if (state.editorPanel && state.editorPanel.classList.contains('open')) {
+                Panel.showEditorPanel(nodeId);
+            }
+        }
     });
     contentInput.addEventListener('mousedown', (e) => {
         e.stopPropagation();
     });
-
+    contentInput.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.ctrlKey && e.code === 'KeyZ') {
+            e.stopPropagation();
+        }
+    });
     // Render if choice node type
     if (node.type === 'choice') {
         renderChoiceContainer(nodeId, container);
@@ -166,9 +192,13 @@ function renderChoiceContainer(nodeId: number, container: HTMLDivElement): void 
     container.appendChild(addButton);
 }
 
-function addChoice(nodeId: number): void {
+export function addChoice(nodeId: number): void {
     const node = state.nodes[nodeId]
     if (!node.choices) {
+        return;
+    }
+    if (Object.values(node.choices).length >= state.maxChoicesPerNode) {
+        console.log(`Max choices in Node: ${nodeId}`)
         return;
     }
     const choiceId = `${nodeId}-${state.choiceIdCounter}`;
@@ -187,6 +217,9 @@ function addChoice(nodeId: number): void {
     renderChoice(nodeId, choiceId);
     updateNodePadSize(nodeId, choiceId, '+');
 
+    if (state.editorPanel && state.editorPanel.classList.contains('open')) {
+        Panel.renderEditorChoices(nodeId);
+    }
     //state.addToActionHistory([choice]);
 }
 
@@ -259,22 +292,49 @@ export function renderChoice(nodeId: number, choiceId: string): void {
     textInput.addEventListener('input', (e) => {
         e.stopPropagation();
         choice.text = textInput.value;
+        if (state.currentPanelNodeId != nodeId) {
+            Panel.hideEditorPanel();
+        }
+        else {
+            if (state.editorPanel && state.editorPanel.classList.contains('open')) {
+                Panel.showEditorPanel(nodeId);
+            }
+        }
     });
     textInput.addEventListener('mousedown', (e) => {
         e.stopPropagation();
     });
+    textInput.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.ctrlKey && e.code === 'KeyZ') {
+            e.stopPropagation();
+        }
+    });
+
     conditionsInput.addEventListener('input', (e) => {
         e.stopPropagation();
         choice.conditions = conditionsInput.value;
+        if (state.currentPanelNodeId != nodeId) {
+            Panel.hideEditorPanel();
+        }
+        else {
+            if (state.editorPanel && state.editorPanel.classList.contains('open')) {
+                Panel.showEditorPanel(nodeId);
+            }
+        }
     });
     conditionsInput.addEventListener('mousedown', (e) => {
         e.stopPropagation();
+    });
+    conditionsInput.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.ctrlKey && e.code === 'KeyZ') {
+            e.stopPropagation();
+        }
     });
 
 }
 
 
-function removeChoice(nodeId: number, choiceId: string): void {
+export function removeChoice(nodeId: number, choiceId: string): void {
     const node = state.nodes[nodeId];
     if (!node.choices) {
         console.error(`Node ${nodeId} has no choices`);
@@ -322,6 +382,11 @@ function removeChoice(nodeId: number, choiceId: string): void {
 
     // Update connections
     Conn.renderAllConnections();
+
+    //Udpate editor panel
+    if (state.editorPanel && state.editorPanel.classList.contains('open')) {
+        Panel.renderEditorChoices(nodeId);
+    }
 }
 
 

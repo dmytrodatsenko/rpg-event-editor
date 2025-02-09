@@ -476,6 +476,9 @@ body {
     z-index: 2000;
     overflow-y: auto;
   }
+  .editor-panel:hover {
+    border-color: var(--violet-color);
+  }
   
   .editor-panel.open {
     transform: translateX(0);

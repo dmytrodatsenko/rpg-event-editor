@@ -49,8 +49,8 @@ export function getComputedCSSValue(varName: string): number {
     } else if (value.endsWith('px')) {
       return parseFloat(value);
     } else if (value.endsWith('%')) {
+    } else if (value.endsWith('ms')) {
     }
-    
     return parseFloat(value);
   };
 

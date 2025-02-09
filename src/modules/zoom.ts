@@ -1,4 +1,4 @@
-
+import * as Utils from '../utils.js';
 import { state } from '../state.js';
 import * as Conn from '../modules/connections.js';
 
@@ -80,8 +80,8 @@ function applyZoom() {
             nodeElement.style.transformOrigin = 'top left';
             
             // Adjust font sizes
-            const baseSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--base-font-size'));
-            const scaledSize = baseSize * state.currentZoom;
+            const baseFontSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--base-font-size'));
+            const scaledSize = baseFontSize * state.currentZoom;
             
             // Update input fields font size
             const inputs = nodeElement.querySelectorAll<HTMLInputElement>('.node-input');
@@ -92,10 +92,18 @@ function applyZoom() {
             // Update connection points size
             const connectionPoints = nodeElement.querySelectorAll<HTMLInputElement>('.connection-point');
             connectionPoints.forEach(point => {
-                const baseSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--connection-point-size'));
-                point.style.width = `${baseSize * state.currentZoom}px`;
-                point.style.height = `${baseSize * state.currentZoom}px`;
+                const baseConnSize = Utils.getComputedCSSValue('--connection-point-size');
+                point.style.width = `${baseConnSize * state.currentZoom}px`;
+                point.style.height = `${baseConnSize * state.currentZoom}px`;
             });
+
+            // Update add choice points size
+            const addChoiceElement = nodeElement.querySelector<HTMLInputElement>('.add-choice');
+            const baseAddChoiceSize = Utils.getComputedCSSValue('--add-choice-height');
+            if (addChoiceElement) {
+                addChoiceElement.style.width  = `${baseAddChoiceSize * state.currentZoom}px`;
+                addChoiceElement.style.height  == `${baseAddChoiceSize * state.currentZoom}px`;
+            }
         }
     });
 }

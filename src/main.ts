@@ -4,6 +4,8 @@ import * as Nodes from './modules/nodes.js';
 import * as Select from './modules/selection.js';
 import * as Actions from './modules/actions.js';
 import * as Conn from './modules/connections.js';
+import * as Panel from './modules/panel.js';
+import * as Save from './modules/save.js';
 
 import {state} from './state.js';
 
@@ -21,7 +23,21 @@ document.addEventListener('DOMContentLoaded', () => {
         addNodeBtn?.addEventListener('click', () => {
             Nodes.addNode('choice');
         });
+
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn?.addEventListener('click', () => {
+            Save.saveState();
+        });
+
+        const loadBtn = document.getElementById('loadBtn');
+        loadBtn?.addEventListener('click', () => {
+            Save.loadState();
+        }); wooork heeeere
         
+
+        //Initialize editor panel
+        Panel.createEditorPanel();
+
     } catch (error) {
         console.error('Failed to initialize NodeManager:', error);
     }
@@ -55,7 +71,9 @@ document.addEventListener('keydown', (e) => {
         state.selectedNodes.forEach((node) => {
             const nodeId = Number(node.id);
             Nodes.removeNode(nodeId);
-            
+            if (state.editorPanel && state.editorPanel.classList.contains('open')) {
+                Panel.hideEditorPanel();
+            }
             // Remove all connections attached to the node and conn elements
             Object.entries(state.connections).forEach(([connId, conn]) => {
                 let shouldRemove = false;
@@ -235,6 +253,7 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
         e.preventDefault();
         e.stopPropagation();
         Actions.undoAction();
+
     }
 });
 
@@ -260,6 +279,15 @@ document.addEventListener('mousedown', (e: MouseEvent) => {
 }, true); 
 
 document.addEventListener('mousemove', (e: MouseEvent) => {
+
+    if (state.selectionBox) {
+        state.selectionBox.style.userSelect = 'none';
+    }
+    // Add no-select class to all node elements
+    document.querySelectorAll('.node').forEach(node => {
+        (node as HTMLElement).style.userSelect = 'none';
+    });
+
     if (!state.isResizing || !state.activeResizeNode) return;
     
     state.selectedNodes.clear();
@@ -287,6 +315,17 @@ document.addEventListener('mousemove', (e: MouseEvent) => {
 }, { passive: true });
 
 document.addEventListener('mouseup', () => {
+    if (state.onSelection) {
+        state.onSelection = false;
+        if (state.selectionBox) {
+            state.selectionBox.style.display = 'none';
+            state.selectionBox.style.userSelect = '';
+        }
+    }
+    document.querySelectorAll('.node').forEach(node => {
+        (node as HTMLElement).style.userSelect = '';
+    });
+    
     if (state.isResizing) {
         state.isResizing = false;
         if (state.activeResizeNode) {
@@ -298,3 +337,15 @@ document.addEventListener('mouseup', () => {
     }
 });
 
+document.addEventListener('dblclick', (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.className.includes('canvas')) {
+        Panel.hideEditorPanel();
+    }
+    const nodeElement = target.closest('[id^="node-"]');
+    if (nodeElement) {
+        const nodeId = Number(nodeElement.id.split('-')[1]);
+        Panel.showEditorPanel(nodeId);
+    }
+    
+});
