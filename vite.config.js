@@ -1,9 +1,18 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [
-  ],
+  plugins: [],
   server: {
-    host: true 
+    host: true
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true
+      }
+    }
   }
 });
