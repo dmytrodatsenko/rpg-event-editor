@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
             Save.loadState();
         });
         
-
         //Initialize editor panel
         Panel.createEditorPanel();
 
