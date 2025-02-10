@@ -5,14 +5,14 @@ export default defineConfig({
   server: {
     host: true
   },
-  build: {
-    outDir: 'dist',
-    sourcemap: true,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true
-      }
-    }
-  }
+  // build: {
+  //   outDir: 'dist',
+  //   sourcemap: true,
+  //   minify: 'esbuild',
+  //   terserOptions: {
+  //     compress: {
+  //       drop_console: true
+  //     }
+  //   }
+  // }
 });
