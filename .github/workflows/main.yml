@@ -1,65 +1,95 @@
+# .github/workflows/build.yml
 name: Build and Release
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
-  build:
+  build-frontend:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-
+          
       - name: Install dependencies
         run: npm ci
-
-      - name: Type check
-        run: npm run tsc
-
-      - name: Build
+        
+      - name: Build frontend
         run: npm run build
-
-      - name: Upload build artifacts
+        
+      - name: Upload frontend artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: frontend-dist
           path: dist/
-          retention-days: 7
 
-  create-release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
+  build-executables:
+    needs: build-frontend
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: windows-latest
+            output_name: rpg-event-editor.exe
+            asset_path: dist/rpg-event-editor.exe
+          - os: ubuntu-latest
+            output_name: rpg-event-editor
+            asset_path: dist/rpg-event-editor
+          - os: macos-latest
+            output_name: rpg-event-editor-mac
+            asset_path: dist/rpg-event-editor-mac
+            
     steps:
-      - name: Download build artifacts
+      - uses: actions/checkout@v4
+      
+      - name: Download frontend build
         uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: frontend-dist
           path: dist
-
-      - name: Create ZIP archive
+          
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Install Python dependencies
         run: |
-          cd dist
-          zip -r ../release.zip .
+          python -m pip install --upgrade pip
+          pip install pyinstaller pywebview
+          
+      - name: Create executable
+        run: pyinstaller --onefile --add-data "dist:dist" main.py --name ${{ matrix.output_name }}
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: release.zip
-          tag_name: v${{ github.run_number }}
-          name: Release v${{ github.run_number }}
-          draft: false
-          prerelease: false
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+          
+      - name: Upload Release Asset
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ matrix.asset_path }}
+          asset_name: ${{ matrix.output_name }}
+          asset_content_type: application/octet-stream
