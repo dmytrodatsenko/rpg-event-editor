@@ -9,9 +9,6 @@ import * as Save from './modules/save.js';
 
 import {state} from './state.js';
 
-// Set up canvas dimensions and scrolling
-
-
 document.addEventListener('DOMContentLoaded', () => {
     try {
         console.log('DOM Content Loaded');
@@ -32,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const loadBtn = document.getElementById('loadBtn');
         loadBtn?.addEventListener('click', () => {
             Save.loadState();
-        }); wooork heeeere
+        });
         
 
         //Initialize editor panel

@@ -1,4 +1,8 @@
 import { state } from '../state.js';
+import * as Utils from '../utils.js';
+import * as Conn from '../modules/connections.js';
+import * as Node from '../modules/nodes.js';
+import * as Zoom from '../modules/zoom.js';
 
 declare global {
     interface Window {
@@ -37,20 +41,14 @@ export async function saveState(): Promise<void> {
             currentZoom: state.currentZoom
         };
 
-        // Convert to JSON, maintaining readable formatting
         const stateJson: string = JSON.stringify(saveableState, null, 2);
-
-        // Create a Blob with the JSON data
         const blob: Blob = new Blob([stateJson], {
             type: 'application/json'
         });
 
-        // Get the last used filename from localStorage or use default
-        const lastSaveLocation: string = localStorage.getItem('lastStateSaveLocation') || 'editor-state.json';
-
-        // Show the save dialog
+        state.lastSaveLocation = localStorage.getItem('lastStateSaveLocation') || 'editor-state.json';
         const handle: FileSystemFileHandle = await window.showSaveFilePicker({
-            suggestedName: lastSaveLocation,
+            suggestedName: state.lastSaveLocation,
             types: [{
                 description: 'JSON State File',
                 accept: {
@@ -58,18 +56,12 @@ export async function saveState(): Promise<void> {
                 }
             }]
         });
-
-        // Save the filename for next time
-        localStorage.setItem('lastStateSaveLocation', handle.name);
-
-        // Write the file
         const writable: FileSystemWritableFileStream = await handle.createWritable();
         await writable.write(blob);
         await writable.close();
+        Utils.showNotification('save', 'State saved successfully!');
 
-        console.log('State saved successfully!');
     } catch (error: unknown) {
-        // Type guard to ensure error is Error type
         if (error instanceof Error && error.name !== 'AbortError') {
             console.error('Error saving state:', error);
             throw new Error(`Failed to save state: ${error.message}`);
@@ -89,17 +81,9 @@ export async function loadState(): Promise<void> {
                 }
             }]
         });
-
-        // Get the file
         const file = await handle.getFile();
-
-        // Store the filename for next time
         localStorage.setItem('lastStateSaveLocation', handle.name);
-
-        // Read the file contents
         const text = await file.text();
-        
-        // Parse the JSON
         const loadedState = JSON.parse(text);
 
         // Update the application state
@@ -114,7 +98,21 @@ export async function loadState(): Promise<void> {
         state.maxChoicesPerNode = loadedState.maxChoicesPerNode;
         state.currentZoom = loadedState.currentZoom;
 
-        console.log('State loaded successfully!');
+        Object.entries(state.nodes).forEach(([nodeId, node]) => {
+            console.log(node);
+            Node.renderNode(Number(nodeId));
+            if (node.choices) {
+                Object.entries(node.choices).forEach(([choiceId, choice]) => {
+                    Node.renderChoice(Number(nodeId), choiceId);
+                });
+            }
+
+        });
+
+        Conn.renderAllConnections();
+        Zoom.initializeZoom();
+        Utils.showNotification('load', 'State loaded successfully!');
+
     } catch (error: unknown) {
         // Type guard to ensure error is Error type
         if (error instanceof Error && error.name !== 'AbortError') {

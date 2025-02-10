@@ -557,3 +557,47 @@ background-color: var(--red-color);
 .panel-button:hover {
     transition: var(--transition-normal);
 }
+
+
+.notification {
+    position: fixed;
+    bottom: var(--toolbar-height);
+    left: -340px;
+    width: 280px;
+    padding: var(--space-sm);
+    border-radius: var(--radius-md);
+    background-color: var(--text-color);
+    transition: var(--transition-normal);
+    z-index: 3000;
+    font-size: var(--text-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification.show {
+    left: 20px;
+}
+
+.notification::before {
+    content: '';
+    width: 0;
+    height: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#saveNotification {
+    background-color: var(--green-color);
+    color: var(--text-color);
+}
+
+#loadNotification {
+    background-color: var(--blue-color); 
+    color: var(--text-color);
+}
+
+#errorNotification {
+    background-color: var(--red-color); 
+    color: var(--text-color);
+}

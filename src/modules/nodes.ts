@@ -198,7 +198,7 @@ export function addChoice(nodeId: number): void {
         return;
     }
     if (Object.values(node.choices).length >= state.maxChoicesPerNode) {
-        console.log(`Max choices in Node: ${nodeId}`)
+        Utils.showNotification('error', `Max choices in Node: ${nodeId}`);
         return;
     }
     const choiceId = `${nodeId}-${state.choiceIdCounter}`;

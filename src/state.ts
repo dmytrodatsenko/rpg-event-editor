@@ -50,6 +50,7 @@ import * as Types from '../src/types.js';
    public editorPanel: HTMLDivElement | null = null;
    public currentPanelNodeId: number | null = null;
 
+   public lastSaveLocation: string = '';
  }
 
  export let state = new State();

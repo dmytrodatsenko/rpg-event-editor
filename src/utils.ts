@@ -64,3 +64,26 @@ export function throttle(func: Function, limit: number) {
         }
     };
 }
+
+export function showNotification(type: 'save' | 'load' | 'error', message: string): void {
+    let notificationId = '';
+    if (type === 'save') {
+        notificationId = 'saveNotification';
+    } else if (type === 'error') {
+        notificationId = 'errorNotification';
+    } else if (type === 'load') {
+        notificationId = 'loadNotification';
+    } else {
+        console.error('Missed notification type');
+        return;
+    }
+    const notification = document.getElementById(notificationId);
+    if (!notification) return;
+    
+    notification.textContent = message;
+    notification.classList.add('show');
+
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 2000);
+}
